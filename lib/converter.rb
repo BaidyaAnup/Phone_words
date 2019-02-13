@@ -1,7 +1,8 @@
+require 'pry'
 class Converter
       def num_to_words(number)
       	#read the dictionary file and store it in array
-      	dictionary_words = File.read("dictionary.txt").split("\n").map(&:downcase)
+      	dictionary_words = File.read("dictionary.txt").split("\r\n").map(&:downcase)
       	#hash of numbers associate with phone keypad
         keypad = {
           "2" => ['a','b','c'],
@@ -27,7 +28,11 @@ class Converter
 
         # take all possible combinations of the words on the keys. 
         # product of each key's characters with all other key's characters
-        words = key_char.shift.product(*key_char).map(&:join)
+        begin
+           words = key_char.shift.product(*key_char).map(&:join)
+        rescue TypeError
+           return "Invalid number"
+        end
         #search all possible combinations against dictionary
         final_words = []
         # loop to get all combinations of words (Minimum word length 3)
@@ -46,9 +51,15 @@ class Converter
       		i += 1
     	end
 
+    	#get exact matches
+        exact_matches = dictionary_words & words
+        final_words << exact_matches
+
+        p final_words.flatten(1)
+
 
       end
 
 end
 num = Converter.new
-puts num.num_to_words("9999999994")
+num.num_to_words("6686787825")
