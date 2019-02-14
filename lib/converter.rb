@@ -1,8 +1,9 @@
-require 'pry'
+
 class Converter
+
       def num_to_words(number)
       	#read the dictionary file and store it in array
-      	dictionary_words = File.read("dictionary.txt").split("\r\n").map(&:downcase)
+      	dictionary_words = File.read("lib/dictionary.txt").split("\r\n").map(&:downcase)
       	#hash of numbers associate with phone keypad
         keypad = {
           "2" => ['a','b','c'],
@@ -19,27 +20,20 @@ class Converter
         unless (number.length == 10 && number.match(/^[2-9]*$/))
            raise "The given number is not valid. Please try again"
         end
-
         # Convert the number into an array
         num_arr = number.split("")
-
         #convert that array of numbers into a array of characters matching each of the number from keypad list
-        key_char = num_arr.map{|x| keypad[x]}
-
+        key_char = num_arr.collect{|x| keypad[x]}
         # take all possible combinations of the words on the keys. 
         # product of each key's characters with all other key's characters
-        begin
-           words = key_char.shift.product(*key_char).map(&:join)
-        rescue TypeError
-           return "Invalid number"
-        end
+        words = key_char.shift.product(*key_char).collect(&:join)
         #search all possible combinations against dictionary
         final_words = []
         # loop to get all combinations of words (Minimum word length 3)
         i = 2
         while i < 7 do
-      		a = words.map{|x| x[0..i]}.uniq
-      		b = words.map{|y| y[i+1..-1]}.uniq
+      		a = words.collect{|x| x[0..i]}.uniq
+      		b = words.collect{|y| y[i+1..-1]}.uniq
 
           # get all matching words from dictionary
       		res_one = dictionary_words & a
@@ -56,10 +50,13 @@ class Converter
         final_words << exact_matches
 
         p final_words.flatten(1)
-
-
       end
 
 end
-num = Converter.new
-num.num_to_words("6686787825")
+
+ unless ENV["CONVERTER_ENV"] == "test"
+ 	puts "Please enter a 10 digit phone number(it should not contain 0 or 1)"
+ 	val = STDIN.gets.chomp
+ 	num = Converter.new 
+ 	num.num_to_words(val)
+ end
